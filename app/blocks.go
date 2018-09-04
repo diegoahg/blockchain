@@ -3,14 +3,21 @@ package app
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"time"
 )
+
+// Car represents car data
+type Car struct {
+	LicensePlate string
+	Owner        string
+}
 
 // Block represents each 'item' in the blockchain
 type Block struct {
 	Index     int
 	Timestamp string
-	BPM       int
+	Car       Car
 	Hash      string
 	PrevHash  string
 }
@@ -18,19 +25,27 @@ type Block struct {
 // Blockchain is a series of validated Blocks
 var Blockchain []Block
 
-// Message takes incoming JSON payload for writing heart rate
-type Message struct {
-	BPM int
+// CarInput takes incoming JSON payload for writing heart rate
+type CarInput struct {
+	LicensePlate string `json:"license_plate"`
+	Owner        string `json:"owner"`
 }
 
-// make sure the chain we're checking is longer than the current blockchain
+// HackInput takes incoming JSON payload for writing heart rate
+type HackInput struct {
+	Index int    `json:"index"`
+	Hash  string `json:"hash"`
+	Owner string `json:"owner"`
+}
+
+// ReplaceChain make sure the chain we're checking is longer than the current blockchain
 func ReplaceChain(newBlocks []Block) {
 	if len(newBlocks) > len(Blockchain) {
 		Blockchain = newBlocks
 	}
 }
 
-// make sure block is valid by checking index, and comparing the hash of the previous block
+// IsBlockValid make sure block is valid by checking index, and comparing the hash of the previous block
 func IsBlockValid(newBlock, oldBlock Block) bool {
 	if oldBlock.Index+1 != newBlock.Index {
 		return false
@@ -47,17 +62,27 @@ func IsBlockValid(newBlock, oldBlock Block) bool {
 	return true
 }
 
-// SHA256 hasing
+// CalculateHash SHA256 hasing
 func CalculateHash(block Block) string {
-	record := string(block.Index) + block.Timestamp + string(block.BPM) + block.PrevHash
+	carJSON, err := json.Marshal(block.Car)
+	if err != nil {
+		panic(err)
+	}
+
+	record := string(block.Index) + block.Timestamp + string(carJSON) + block.PrevHash
 	h := sha256.New()
 	h.Write([]byte(record))
 	hashed := h.Sum(nil)
 	return hex.EncodeToString(hashed)
 }
 
-// create a new block using previous block's hash
-func GenerateBlock(BPM int) (Block, error) {
+// GenerateBlock create a new block using previous block's hash
+func GenerateBlock(lp string, o string) (Block, error) {
+
+	car := Car{
+		LicensePlate: lp,
+		Owner:        o,
+	}
 
 	oldBlock := Blockchain[len(Blockchain)-1]
 
@@ -66,9 +91,20 @@ func GenerateBlock(BPM int) (Block, error) {
 
 	newBlock.Index = oldBlock.Index + 1
 	newBlock.Timestamp = t.String()
-	newBlock.BPM = BPM
+	newBlock.Car = car
 	newBlock.PrevHash = oldBlock.Hash
 	newBlock.Hash = CalculateHash(newBlock)
 
 	return newBlock, nil
+}
+
+// HackBlock edit some fields in some block
+func HackBlock(index int, hash string, owner string) *Block {
+
+	block := &Blockchain[index]
+
+	block.Car.Owner = owner
+	block.Hash = hash
+
+	return block
 }

@@ -29,7 +29,8 @@ func New() *App {
 func (ai *App) Run() {
 	go func() {
 		t := time.Now()
-		genesisBlock := Block{0, t.String(), 0, "", ""}
+		car := Car{}
+		genesisBlock := Block{0, t.String(), car, "", ""}
 		spew.Dump(genesisBlock)
 		Blockchain = append(Blockchain, genesisBlock)
 	}()

@@ -15,11 +15,12 @@ func Init(ai *app.App) {
 	router := ai.Router
 	router.GET("/api/blocks", GetBlockHandler)
 	router.POST("/api/blocks", PostBlockHandler)
+	router.POST("/api/hack", HackBlockHandler)
 
 	log.Println("Initialized api")
 }
 
-// write blockchain when we receive an http request
+// GetBlockHandler write blockchain when we receive an http request
 func GetBlockHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	bytes, err := json.MarshalIndent(app.Blockchain, "", "  ")
 	if err != nil {
@@ -29,20 +30,20 @@ func GetBlockHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 	io.WriteString(w, string(bytes))
 }
 
-// takes JSON payload as an input for heart rate (BPM)
+// PostBlockHandler takes JSON payload as an input for heart rate (Car)
 func PostBlockHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	var m app.Message
+	var input app.CarInput
 
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&m); err != nil {
+	if err := decoder.Decode(&input); err != nil {
 		respondWithJSON(w, r, http.StatusBadRequest, r.Body)
 		return
 	}
 	defer r.Body.Close()
 
-	newBlock, err := app.GenerateBlock(m.BPM)
+	newBlock, err := app.GenerateBlock(input.LicensePlate, input.Owner)
 	if err != nil {
-		respondWithJSON(w, r, http.StatusInternalServerError, m)
+		respondWithJSON(w, r, http.StatusInternalServerError, input)
 		return
 	}
 
@@ -53,6 +54,21 @@ func PostBlockHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Param
 	}
 
 	respondWithJSON(w, r, http.StatusCreated, newBlock)
+}
+
+// PostBlockHandler takes JSON payload as an input for heart rate (Car)
+func HackBlockHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	var input app.HackInput
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&input); err != nil {
+		respondWithJSON(w, r, http.StatusBadRequest, r.Body)
+		return
+	}
+	defer r.Body.Close()
+
+	hackBlock := app.HackBlock(input.Index, input.Hash, input.Owner)
+	respondWithJSON(w, r, http.StatusOK, hackBlock)
 }
 
 func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
