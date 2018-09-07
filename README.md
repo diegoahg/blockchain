@@ -19,6 +19,7 @@ First validate if chain is correct and then get all blocks
 ## POST /api/blocks
 Send the car data
 
+Request example:
 ```
 {
 	"license_plate": "JCBR87",
@@ -29,6 +30,7 @@ Send the car data
 ## POST /api/hack
 Can edit block values
 
+Request example:
 ```
 {
 	"index":2,
