@@ -12,9 +12,27 @@ This code heavily inspired from "Code your own blockchain in less than [200 line
 - fill the environment variables in `config/.env`
 - install depenedences `go get`
 - run de app `go run main.go`
-- open a web browser and visit `http://localhost:8082/api/blocks`
-- to write new blocks, send a `POST` request to `http://localhost:8080/api/blocks` with a JSON payload with `BPM` as the key and an integer as the value. For example:
+
+## GET /api/blocks
+First validate if chain is correct and then get all blocks
+
+## POST /api/blocks
+Send the car data
+
 ```
-{"BPM":50}
+{
+	"license_plate": "JCBR87",
+	"owner": "Diego3"
+}
 ```
-- Send as many requests as you like and refresh your browser to see your blocks grow! Use your actual heart rate (Beats Per Minute) to track it over time.
+
+## POST /api/hack
+Can edit block values
+
+```
+{
+	"index":2,
+	"owner":"Omar",
+	"hash":"uyfluyfyf"
+}
+```

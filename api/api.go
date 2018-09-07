@@ -27,6 +27,10 @@ func GetBlockHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	if !app.IsChainValid(app.Blockchain) {
+		io.WriteString(w, "Chain is not valid")
+		return
+	}
 	io.WriteString(w, string(bytes))
 }
 

@@ -108,3 +108,17 @@ func HackBlock(index int, hash string, owner string) *Block {
 
 	return block
 }
+
+func IsChainValid(bc []Block) bool {
+	for i := 1; i < len(bc); i++ {
+		currentBlock := bc[i]
+		previousBlock := bc[i-1]
+		if currentBlock.Hash != CalculateHash(currentBlock) {
+			return false
+		}
+		if currentBlock.PrevHash != previousBlock.Hash {
+			return false
+		}
+	}
+	return true
+}
