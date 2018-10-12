@@ -27,7 +27,7 @@ Request example:
 }
 ```
 
-## POST /api/hack
+## PUT /api/hack
 Can edit block values
 
 Request example:

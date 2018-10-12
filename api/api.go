@@ -15,7 +15,7 @@ func Init(ai *app.App) {
 	router := ai.Router
 	router.GET("/api/blocks", GetBlockHandler)
 	router.POST("/api/blocks", PostBlockHandler)
-	router.POST("/api/hack", HackBlockHandler)
+	router.PUT("/api/hack", HackBlockHandler)
 
 	log.Println("Initialized api")
 }
